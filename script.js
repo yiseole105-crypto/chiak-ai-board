@@ -1,4 +1,48 @@
-// script.js
+import {
+  initializeApp
+} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+
+import {
+  browserLocalPersistence,
+  getAuth,
+  GoogleAuthProvider,
+  onAuthStateChanged,
+  setPersistence,
+  signInWithPopup,
+  signOut
+} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getFirestore,
+  onSnapshot,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCXoV4XYlFYRWeyDOwi6xI6z0OeALd8--M",
+  authDomain: "chiak-ai-board.firebaseapp.com",
+  projectId: "chiak-ai-board",
+  storageBucket: "chiak-ai-board.firebasestorage.app",
+  messagingSenderId: "901292202446",
+  appId: "1:901292202446:web:a88f8e208d72bd4d71f39f",
+  measurementId: "G-C96Q4F6DQB"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const googleProvider = new GoogleAuthProvider();
+
+googleProvider.setCustomParameters({
+  prompt: "select_account"
+});
+
+const ADMIN_EMAIL = "yiseole105@gmail.com";
 
 const CATEGORY_LABELS = {
   exam: "시험·평가",
@@ -14,34 +58,31 @@ const academicEvents = [
   schedule("2026-03-02", "대체공휴일", "holiday"),
   schedule("2026-03-03", "입학식", "school"),
   schedule("2026-03-06", "동아리 활동", "club"),
+
   schedule(
     "2026-03-09",
     "진로상담 기간",
     "meeting",
     "2026-03-27"
   ),
+
   schedule("2026-03-13", "어울림 회의", "meeting"),
+
   schedule(
     "2026-03-18",
     "학부모 총회(학교 설명회)",
     "school"
   ),
+
   schedule("2026-03-20", "동아리 활동", "club"),
-  schedule(
-    "2026-03-24",
-    "전국연합학력평가",
-    "exam"
-  ),
-  schedule(
-    "2026-03-26",
-    "1학년 대표 선거",
-    "school"
-  ),
+  schedule("2026-03-24", "전국연합학력평가", "exam"),
+  schedule("2026-03-26", "1학년 대표 선거", "school"),
   schedule("2026-03-27", "동아리 활동", "club"),
 
   schedule("2026-04-03", "어울림 회의", "meeting"),
   schedule("2026-04-10", "동아리 활동", "club"),
   schedule("2026-04-15", "개교기념일", "school"),
+
   schedule(
     "2026-04-20",
     "1회고사",
@@ -52,61 +93,57 @@ const academicEvents = [
   schedule("2026-05-01", "재량휴업일", "holiday"),
   schedule("2026-05-04", "재량휴업일", "holiday"),
   schedule("2026-05-05", "어린이날", "holiday"),
+
   schedule(
     "2026-05-06",
     "교육실습",
     "school",
     "2026-06-04"
   ),
+
   schedule(
     "2026-05-07",
     "3학년 전국연합학력평가",
     "exam"
   ),
+
   schedule("2026-05-08", "동아리 활동", "club"),
-  schedule(
-    "2026-05-13",
-    "교육과정 박람회",
-    "school"
-  ),
+  schedule("2026-05-13", "교육과정 박람회", "school"),
   schedule("2026-05-15", "스승의 날", "school"),
+
   schedule(
     "2026-05-18",
     "1차 과목선택",
     "school",
     "2026-05-22"
   ),
+
   schedule(
     "2026-05-22",
     "연합체육대회(1학년)",
     "school"
   ),
+
   schedule("2026-05-24", "부처님오신날", "holiday"),
   schedule("2026-05-25", "대체공휴일", "holiday"),
   schedule("2026-05-28", "체육한마당", "school"),
   schedule("2026-05-29", "동아리 활동", "club"),
 
   schedule("2026-06-03", "지방선거", "holiday"),
-  schedule(
-    "2026-06-04",
-    "3학년 수능모의평가",
-    "exam"
-  ),
-  schedule(
-    "2026-06-04",
-    "1·2학년 전국연합평가",
-    "exam"
-  ),
+  schedule("2026-06-04", "3학년 수능모의평가", "exam"),
+  schedule("2026-06-04", "1·2학년 전국연합평가", "exam"),
   schedule("2026-06-05", "동아리 활동", "club"),
   schedule("2026-06-06", "현충일", "holiday"),
   schedule("2026-06-12", "어울림 회의", "meeting"),
   schedule("2026-06-19", "동아리 활동", "club"),
+
   schedule(
     "2026-06-22",
     "2회고사",
     "exam",
     "2026-06-26"
   ),
+
   schedule(
     "2026-06-29",
     "2차 과목선택",
@@ -115,19 +152,12 @@ const academicEvents = [
   ),
 
   schedule("2026-07-03", "동아리 활동", "club"),
-  schedule(
-    "2026-07-08",
-    "3학년 전국연합학력평가",
-    "exam"
-  ),
-  schedule(
-    "2026-07-10",
-    "교육과정 평가회",
-    "school"
-  ),
+  schedule("2026-07-08", "3학년 전국연합학력평가", "exam"),
+  schedule("2026-07-10", "교육과정 평가회", "school"),
   schedule("2026-07-15", "학술제", "school"),
   schedule("2026-07-17", "제헌절", "holiday"),
   schedule("2026-07-21", "방학식", "school"),
+
   schedule(
     "2026-07-22",
     "여름방학",
@@ -139,31 +169,26 @@ const academicEvents = [
   schedule("2026-08-14", "어울림 회의", "meeting"),
   schedule("2026-08-15", "광복절", "holiday"),
   schedule("2026-08-17", "대체공휴일", "holiday"),
+
   schedule(
     "2026-08-18",
     "진로상담 기간",
     "meeting",
     "2026-08-28"
   ),
+
   schedule("2026-08-21", "동아리 활동", "club"),
   schedule("2026-08-28", "어울림 회의", "meeting"),
 
-  schedule(
-    "2026-09-02",
-    "3학년 수능모의평가",
-    "exam"
-  ),
-  schedule(
-    "2026-09-02",
-    "1·2학년 연합학력평가",
-    "exam"
-  ),
+  schedule("2026-09-02", "3학년 수능모의평가", "exam"),
+  schedule("2026-09-02", "1·2학년 연합학력평가", "exam"),
   schedule("2026-09-04", "동아리 활동", "club"),
   schedule("2026-09-11", "어울림 회의", "meeting"),
   schedule("2026-09-18", "동아리 활동", "club"),
   schedule("2026-09-24", "추석연휴", "holiday"),
   schedule("2026-09-25", "추석", "holiday"),
   schedule("2026-09-26", "추석연휴", "holiday"),
+
   schedule(
     "2026-09-28",
     "1회고사",
@@ -177,42 +202,41 @@ const academicEvents = [
     "school",
     "2026-10-08"
   ),
+
   schedule("2026-10-03", "개천절", "holiday"),
   schedule("2026-10-05", "대체공휴일", "holiday"),
   schedule("2026-10-09", "한글날", "holiday"),
+
   schedule(
     "2026-10-13",
     "2학년 체험학습",
     "school",
     "2026-10-16"
   ),
-  schedule(
-    "2026-10-14",
-    "1학년 체험학습",
-    "school"
-  ),
-  schedule(
-    "2026-10-20",
-    "전국연합학력평가",
-    "exam"
-  ),
+
+  schedule("2026-10-14", "1학년 체험학습", "school"),
+  schedule("2026-10-20", "전국연합학력평가", "exam"),
   schedule("2026-10-23", "어울림 회의", "meeting"),
   schedule("2026-10-30", "동아리 활동", "club"),
 
   schedule("2026-11-06", "어울림 회의", "meeting"),
   schedule("2026-11-13", "동아리 활동", "club"),
+
   schedule(
     "2026-11-19",
     "대학수학능력시험(재량휴업일)",
     "exam"
   ),
+
   schedule("2026-11-20", "동아리 활동", "club"),
+
   schedule(
     "2026-11-23",
     "3학년 2회고사",
     "exam",
     "2026-11-26"
   ),
+
   schedule(
     "2026-11-30",
     "1·2학년 2회고사",
@@ -222,50 +246,36 @@ const academicEvents = [
 
   schedule("2026-12-11", "졸업평가회", "school"),
   schedule("2026-12-11", "동아리 활동", "club"),
+
   schedule(
     "2026-12-14",
     "자율교육과정 운영",
     "school",
     "2026-12-18"
   ),
-  schedule(
-    "2026-12-16",
-    "학생자치회 선거",
-    "school"
-  ),
-  schedule(
-    "2026-12-18",
-    "교육과정 평가회",
-    "school"
-  ),
-  schedule(
-    "2026-12-21",
-    "1학년 진급평가회",
-    "school"
-  ),
-  schedule(
-    "2026-12-22",
-    "2학년 진급평가회",
-    "school"
-  ),
+
+  schedule("2026-12-16", "학생자치회 선거", "school"),
+  schedule("2026-12-18", "교육과정 평가회", "school"),
+  schedule("2026-12-21", "1학년 진급평가회", "school"),
+  schedule("2026-12-22", "2학년 진급평가회", "school"),
+
   schedule(
     "2026-12-23",
     "보은제",
     "school",
     "2026-12-24"
   ),
+
   schedule("2026-12-25", "성탄절", "holiday"),
-  schedule(
-    "2026-12-29",
-    "졸업식·종업식",
-    "school"
-  ),
+  schedule("2026-12-29", "졸업식·종업식", "school"),
+
   schedule(
     "2026-12-30",
     "겨울방학",
     "holiday",
     "2027-01-31"
   ),
+
   schedule("2027-01-01", "신정", "holiday")
 ];
 
@@ -275,6 +285,12 @@ const elements = {
   calendarYear: document.querySelector("#calendarYear"),
   calendarMonth: document.querySelector("#calendarMonth"),
   calendarWeeks: document.querySelector("#calendarWeeks"),
+
+  syncStatus: document.querySelector("#syncStatus"),
+  authStatus: document.querySelector("#authStatus"),
+  loginButton: document.querySelector("#loginButton"),
+  logoutButton: document.querySelector("#logoutButton"),
+  openAddEvent: document.querySelector("#openAddEvent"),
 
   addModal: document.querySelector("#addModal"),
   detailModal: document.querySelector("#detailModal"),
@@ -307,7 +323,10 @@ const elements = {
 };
 
 let shownMonth = startOfMonth(new Date());
-let customEvents = loadCustomEvents();
+let sharedEvents = [];
+
+let currentUser = null;
+let isAdmin = false;
 
 let selectedDdayId =
   localStorage.getItem("chiak-selected-dday") || "";
@@ -322,6 +341,114 @@ function initialize() {
   loadMemo();
   bindEvents();
   renderAll();
+  initializeFirebase();
+}
+
+function initializeFirebase() {
+  setPersistence(
+    auth,
+    browserLocalPersistence
+  ).catch((error) => {
+    console.warn(
+      "로그인 상태 저장 설정 실패",
+      error
+    );
+  });
+
+  onAuthStateChanged(auth, (user) => {
+    currentUser = user;
+
+    isAdmin =
+      user?.email?.toLowerCase() ===
+      ADMIN_EMAIL;
+
+    updateAdminUI();
+  });
+
+  subscribeToSharedEvents();
+}
+
+function subscribeToSharedEvents() {
+  elements.syncStatus.textContent =
+    "공유 일정 연결 중";
+
+  elements.syncStatus.className =
+    "sync-status loading";
+
+  onSnapshot(
+    collection(db, "events"),
+
+    (snapshot) => {
+      sharedEvents = snapshot.docs
+        .map((snapshotDoc) => {
+          const data = snapshotDoc.data();
+
+          const start =
+            String(data.start || "");
+
+          const end =
+            String(
+              data.end ||
+              data.start ||
+              ""
+            );
+
+          const category =
+            CATEGORY_LABELS[data.category]
+              ? data.category
+              : "school";
+
+          return {
+            id: snapshotDoc.id,
+            title: String(
+              data.title || "제목 없음"
+            ),
+            start,
+            end,
+            category,
+            description: String(
+              data.description || ""
+            ),
+            createdBy: String(
+              data.createdBy || ""
+            ),
+            source: "firestore"
+          };
+        })
+
+        .filter((item) => {
+          return (
+            isDateKey(item.start) &&
+            isDateKey(item.end)
+          );
+        });
+
+      elements.syncStatus.textContent =
+        `공유 일정 연결됨 · ${sharedEvents.length}개`;
+
+      elements.syncStatus.className =
+        "sync-status connected";
+
+      renderAll();
+    },
+
+    (error) => {
+      console.error(
+        "Firestore 일정 불러오기 실패",
+        error
+      );
+
+      elements.syncStatus.textContent =
+        "공유 일정 연결 실패";
+
+      elements.syncStatus.className =
+        "sync-status error";
+
+      showToast(
+        "공유 일정을 불러오지 못했습니다. Firestore 규칙과 인터넷 연결을 확인하세요."
+      );
+    }
+  );
 }
 
 function bindEvents() {
@@ -352,55 +479,103 @@ function bindEvents() {
   document
     .querySelector("#goToday")
     .addEventListener("click", () => {
-      shownMonth = startOfMonth(new Date());
+      shownMonth =
+        startOfMonth(new Date());
+
       renderCalendar();
     });
 
-  document
-    .querySelector("#openAddEvent")
-    .addEventListener("click", () => {
-      openAddModal(formatDateKey(new Date()));
-    });
+  elements.loginButton.addEventListener(
+    "click",
+    signInAsAdmin
+  );
+
+  elements.logoutButton.addEventListener(
+    "click",
+    signOutAdmin
+  );
+
+  elements.openAddEvent.addEventListener(
+    "click",
+    () => {
+      if (!isAdmin) {
+        showToast(
+          "일정 추가는 관리자 계정으로 로그인해야 합니다."
+        );
+
+        return;
+      }
+
+      openAddModal(
+        formatDateKey(new Date())
+      );
+    }
+  );
 
   document
-    .querySelectorAll(".theme-tab[data-theme]")
+    .querySelectorAll(
+      ".theme-tab[data-theme]"
+    )
     .forEach((button) => {
-      button.addEventListener("click", () => {
-        setTheme(button.dataset.theme);
-      });
+      button.addEventListener(
+        "click",
+        () => {
+          setTheme(
+            button.dataset.theme
+          );
+        }
+      );
     });
 
   elements.eventStartInput.addEventListener(
     "change",
     () => {
-      const start = elements.eventStartInput.value;
-      const end = elements.eventEndInput.value;
+      const start =
+        elements.eventStartInput.value;
+
+      const end =
+        elements.eventEndInput.value;
 
       if (!end || end < start) {
-        elements.eventEndInput.value = start;
+        elements.eventEndInput.value =
+          start;
       }
     }
   );
 
   elements.addEventForm.addEventListener(
     "submit",
-    addCustomEvent
+    addSharedEvent
   );
 
   document
-    .querySelectorAll("[data-close-add]")
+    .querySelectorAll(
+      "[data-close-add]"
+    )
     .forEach((button) => {
-      button.addEventListener("click", () => {
-        closeModal(elements.addModal);
-      });
+      button.addEventListener(
+        "click",
+        () => {
+          closeModal(
+            elements.addModal
+          );
+        }
+      );
     });
 
   document
-    .querySelectorAll("[data-close-detail]")
+    .querySelectorAll(
+      "[data-close-detail]"
+    )
     .forEach((button) => {
-      button.addEventListener("click", () => {
-        closeModal(elements.detailModal);
-      });
+      button.addEventListener(
+        "click",
+        () => {
+          closeModal(
+            elements.detailModal
+          );
+        }
+      );
     });
 
   elements.clearDday.addEventListener(
@@ -426,7 +601,9 @@ function bindEvents() {
       event.preventDefault();
 
       const question =
-        elements.assistantInput.value.trim();
+        elements.assistantInput
+          .value
+          .trim();
 
       if (!question) {
         return;
@@ -434,16 +611,24 @@ function bindEvents() {
 
       askAssistant(question);
 
-      elements.assistantInput.value = "";
+      elements.assistantInput.value =
+        "";
     }
   );
 
   document
-    .querySelectorAll("[data-question]")
+    .querySelectorAll(
+      "[data-question]"
+    )
     .forEach((button) => {
-      button.addEventListener("click", () => {
-        askAssistant(button.dataset.question);
-      });
+      button.addEventListener(
+        "click",
+        () => {
+          askAssistant(
+            button.dataset.question
+          );
+        }
+      );
     });
 
   elements.memoInput.addEventListener(
@@ -470,18 +655,149 @@ function bindEvents() {
 
       saveMemo();
 
-      showToast("메모를 지웠습니다.");
+      showToast(
+        "메모를 지웠습니다."
+      );
     });
 
   document.addEventListener(
     "keydown",
     (event) => {
       if (event.key === "Escape") {
-        closeModal(elements.addModal);
-        closeModal(elements.detailModal);
+        closeModal(
+          elements.addModal
+        );
+
+        closeModal(
+          elements.detailModal
+        );
       }
     }
   );
+}
+
+async function signInAsAdmin() {
+  const originalText =
+    elements.loginButton.textContent;
+
+  elements.loginButton.disabled = true;
+
+  elements.loginButton.textContent =
+    "로그인 중...";
+
+  try {
+    const result =
+      await signInWithPopup(
+        auth,
+        googleProvider
+      );
+
+    const email =
+      result.user.email?.toLowerCase();
+
+    if (email !== ADMIN_EMAIL) {
+      showToast(
+        `이 계정은 읽기 전용입니다. 관리자 계정 ${ADMIN_EMAIL}로 로그인하세요.`
+      );
+    } else {
+      showToast(
+        "관리자 로그인에 성공했습니다."
+      );
+    }
+  } catch (error) {
+    handleAuthError(error);
+  } finally {
+    elements.loginButton.disabled =
+      false;
+
+    elements.loginButton.textContent =
+      originalText;
+  }
+}
+
+async function signOutAdmin() {
+  try {
+    await signOut(auth);
+
+    showToast(
+      "로그아웃했습니다."
+    );
+  } catch (error) {
+    console.error(
+      "로그아웃 실패",
+      error
+    );
+
+    showToast(
+      "로그아웃하지 못했습니다."
+    );
+  }
+}
+
+function handleAuthError(error) {
+  console.error(
+    "Firebase 로그인 오류:",
+    error.code,
+    error.message,
+    error
+  );
+
+  const errorCode =
+    error.code || "알 수 없는 오류";
+
+  const errorMessage =
+    error.message || "오류 설명이 없습니다.";
+
+  showToast(
+    `로그인 실패: ${errorCode}`
+  );
+
+  window.alert(
+    `Firebase 로그인 오류\n\n` +
+    `오류 코드: ${errorCode}\n\n` +
+    `오류 내용: ${errorMessage}`
+  );
+}
+
+function updateAdminUI() {
+  if (isAdmin) {
+    elements.authStatus.textContent =
+      `${currentUser.displayName || currentUser.email} · 관리자`;
+
+    elements.loginButton.hidden =
+      true;
+
+    elements.logoutButton.hidden =
+      false;
+
+    elements.openAddEvent.hidden =
+      false;
+
+    return;
+  }
+
+  elements.openAddEvent.hidden =
+    true;
+
+  if (currentUser) {
+    elements.authStatus.textContent =
+      `${currentUser.email} · 읽기 전용`;
+
+    elements.loginButton.hidden =
+      true;
+
+    elements.logoutButton.hidden =
+      false;
+  } else {
+    elements.authStatus.textContent =
+      "친구용 보기 모드";
+
+    elements.loginButton.hidden =
+      false;
+
+    elements.logoutButton.hidden =
+      true;
+  }
 }
 
 function renderAll() {
@@ -491,73 +807,100 @@ function renderAll() {
 }
 
 function renderCalendar() {
-  const year = shownMonth.getFullYear();
-  const month = shownMonth.getMonth();
+  const year =
+    shownMonth.getFullYear();
 
-  const gridStart = startOfWeekSunday(
-    new Date(year, month, 1)
-  );
+  const month =
+    shownMonth.getMonth();
 
-  const todayKey = formatDateKey(
-    new Date()
-  );
+  const gridStart =
+    startOfWeekSunday(
+      new Date(year, month, 1)
+    );
+
+  const todayKey =
+    formatDateKey(new Date());
 
   elements.heroMonth.textContent =
-    String(month + 1).padStart(2, "0");
+    String(month + 1).padStart(
+      2,
+      "0"
+    );
 
-  elements.heroYear.textContent = year;
-  elements.calendarYear.textContent = year;
+  elements.heroYear.textContent =
+    year;
+
+  elements.calendarYear.textContent =
+    year;
 
   elements.calendarMonth.textContent =
-    String(month + 1).padStart(2, "0");
+    String(month + 1).padStart(
+      2,
+      "0"
+    );
 
-  elements.calendarWeeks.innerHTML = "";
+  elements.calendarWeeks.innerHTML =
+    "";
 
   for (
     let weekIndex = 0;
     weekIndex < 6;
     weekIndex += 1
   ) {
-    const weekStart = addDays(
-      gridStart,
-      weekIndex * 7
-    );
+    const weekStart =
+      addDays(
+        gridStart,
+        weekIndex * 7
+      );
 
-    const weekEnd = addDays(
-      weekStart,
-      6
-    );
+    const weekEnd =
+      addDays(
+        weekStart,
+        6
+      );
 
     const weekRow =
-      document.createElement("section");
-
-    weekRow.className = "week-row";
+      document.createElement(
+        "section"
+      );
 
     const weekGrid =
-      document.createElement("div");
-
-    weekGrid.className = "week-grid";
+      document.createElement(
+        "div"
+      );
 
     const dayCells = [];
+
+    weekRow.className =
+      "week-row";
+
+    weekGrid.className =
+      "week-grid";
 
     for (
       let dayIndex = 0;
       dayIndex < 7;
       dayIndex += 1
     ) {
-      const date = addDays(
-        weekStart,
-        dayIndex
-      );
+      const date =
+        addDays(
+          weekStart,
+          dayIndex
+        );
 
       const dateKey =
         formatDateKey(date);
 
       const dayCell =
-        document.createElement("button");
+        document.createElement(
+          "button"
+        );
 
-      dayCell.type = "button";
-      dayCell.className = "day-cell";
+      dayCell.type =
+        "button";
+
+      dayCell.className =
+        "day-cell";
 
       dayCell.innerHTML = `
         <span class="day-number">
@@ -565,31 +908,49 @@ function renderCalendar() {
         </span>
       `;
 
-      if (date.getMonth() !== month) {
+      if (
+        date.getMonth() !== month
+      ) {
         dayCell.classList.add(
           "other-month"
         );
       }
 
       if (dateKey === todayKey) {
-        dayCell.classList.add("today");
+        dayCell.classList.add(
+          "today"
+        );
       }
 
       dayCell.addEventListener(
         "click",
         () => {
+          if (!isAdmin) {
+            showToast(
+              "일정 추가는 관리자만 할 수 있습니다."
+            );
+
+            return;
+          }
+
           openAddModal(dateKey);
         }
       );
 
-      weekGrid.appendChild(dayCell);
+      weekGrid.appendChild(
+        dayCell
+      );
+
       dayCells.push(dayCell);
     }
 
     const eventLayer =
-      document.createElement("div");
+      document.createElement(
+        "div"
+      );
 
-    eventLayer.className = "event-layer";
+    eventLayer.className =
+      "event-layer";
 
     renderWeekEvents(
       weekStart,
@@ -598,12 +959,16 @@ function renderCalendar() {
       dayCells
     );
 
-    weekRow.appendChild(weekGrid);
-    weekRow.appendChild(eventLayer);
-
-    elements.calendarWeeks.appendChild(
-      weekRow
+    weekRow.appendChild(
+      weekGrid
     );
+
+    weekRow.appendChild(
+      eventLayer
+    );
+
+    elements.calendarWeeks
+      .appendChild(weekRow);
   }
 }
 
@@ -613,28 +978,34 @@ function renderWeekEvents(
   eventLayer,
   dayCells
 ) {
-  const weekEvents = getAllEvents()
-    .filter((item) => {
-      return intersects(
-        item,
-        weekStart,
-        weekEnd
-      );
-    })
-    .sort((first, second) => {
-      const startDifference =
-        parseDate(first.start) -
-        parseDate(second.start);
+  const weekEvents =
+    getAllEvents()
+      .filter((item) => {
+        return intersects(
+          item,
+          weekStart,
+          weekEnd
+        );
+      })
 
-      if (startDifference !== 0) {
-        return startDifference;
-      }
+      .sort(
+        (first, second) => {
+          const startDifference =
+            parseDate(first.start) -
+            parseDate(second.start);
 
-      return (
-        eventLength(second) -
-        eventLength(first)
+          if (
+            startDifference !== 0
+          ) {
+            return startDifference;
+          }
+
+          return (
+            eventLength(second) -
+            eventLength(first)
+          );
+        }
       );
-    });
 
   const laneEndColumns = [
     -1,
@@ -652,7 +1023,8 @@ function renderWeekEvents(
 
     const itemEnd =
       parseDate(
-        item.end || item.start
+        item.end ||
+        item.start
       );
 
     const segmentStart =
@@ -680,29 +1052,40 @@ function renderWeekEvents(
     const lane =
       laneEndColumns.findIndex(
         (lastColumn) => {
-          return startColumn > lastColumn;
+          return (
+            startColumn >
+            lastColumn
+          );
         }
       );
 
     if (lane === -1) {
       for (
-        let column = startColumn;
+        let column =
+          startColumn;
         column <= endColumn;
         column += 1
       ) {
-        overflowByDay[column] += 1;
+        overflowByDay[column] +=
+          1;
       }
 
       return;
     }
 
-    laneEndColumns[lane] = endColumn;
+    laneEndColumns[lane] =
+      endColumn;
 
     const eventButton =
-      document.createElement("button");
+      document.createElement(
+        "button"
+      );
 
-    eventButton.type = "button";
-    eventButton.className = "event-bar";
+    eventButton.type =
+      "button";
+
+    eventButton.className =
+      "event-bar";
 
     eventButton.dataset.category =
       item.category;
@@ -735,11 +1118,14 @@ function renderWeekEvents(
       "click",
       (event) => {
         event.stopPropagation();
+
         showDetail(item);
       }
     );
 
-    eventLayer.appendChild(eventButton);
+    eventLayer.appendChild(
+      eventButton
+    );
   });
 
   overflowByDay.forEach(
@@ -749,28 +1135,43 @@ function renderWeekEvents(
       }
 
       const more =
-        document.createElement("span");
+        document.createElement(
+          "span"
+        );
 
-      more.className = "overflow-count";
-      more.textContent = `+${count}`;
+      more.className =
+        "overflow-count";
 
-      dayCells[index].appendChild(more);
+      more.textContent =
+        `+${count}`;
+
+      dayCells[index]
+        .appendChild(more);
     }
   );
 }
 
 function renderDday() {
   const manualEvent =
-    getAllEvents().find((item) => {
-      return item.id === selectedDdayId;
-    });
+    getAllEvents().find(
+      (item) => {
+        return (
+          item.id ===
+          selectedDdayId
+        );
+      }
+    );
 
   const target =
     manualEvent ||
     getAutomaticDdayEvent();
 
-  elements.clearDday.style.visibility =
-    manualEvent ? "visible" : "hidden";
+  elements.clearDday
+    .style
+    .visibility =
+      manualEvent
+        ? "visible"
+        : "hidden";
 
   if (!target) {
     elements.selectedDday.innerHTML = `
@@ -783,19 +1184,20 @@ function renderDday() {
     return;
   }
 
-  const today = stripTime(new Date());
-
-  const difference =
-    daysBetween(
-      today,
-      parseDate(target.start)
-    );
+  const today =
+    stripTime(new Date());
 
   const label =
-    formatDday(difference);
+    formatEventDday(
+      target,
+      today
+    );
 
   elements.selectedDday.innerHTML = `
-    <div class="dday-main">
+    <button
+      class="dday-main"
+      type="button"
+    >
       <small>
         ${
           manualEvent
@@ -804,7 +1206,9 @@ function renderDday() {
         }
       </small>
 
-      <strong>${label}</strong>
+      <strong>
+        ${label}
+      </strong>
 
       <p>
         ${escapeHtml(target.title)}
@@ -813,64 +1217,85 @@ function renderDday() {
       <span>
         ${formatEventDate(target)}
       </span>
-    </div>
+    </button>
   `;
 
   elements.selectedDday
-    .querySelector(".dday-main")
-    .addEventListener("click", () => {
-      showDetail(target);
-    });
+    .querySelector(
+      ".dday-main"
+    )
+    .addEventListener(
+      "click",
+      () => {
+        showDetail(target);
+      }
+    );
 }
 
 function getAutomaticDdayEvent() {
-  const today = stripTime(new Date());
+  const today =
+    stripTime(new Date());
 
   return (
     getAllEvents()
       .filter((item) => {
         return (
           parseDate(
-            item.end || item.start
+            item.end ||
+            item.start
           ) >= today
         );
       })
+
       .filter((item) => {
         return [
           "exam",
           "assignment",
           "school"
-        ].includes(item.category);
-      })
-      .sort((first, second) => {
-        return (
-          parseDate(first.start) -
-          parseDate(second.start)
+        ].includes(
+          item.category
         );
-      })[0] || null
+      })
+
+      .sort(
+        (first, second) => {
+          return (
+            parseDate(first.start) -
+            parseDate(second.start)
+          );
+        }
+      )[0] || null
   );
 }
 
 function renderUpcoming() {
-  const today = stripTime(new Date());
+  const today =
+    stripTime(new Date());
 
-  const upcoming = getAllEvents()
-    .filter((item) => {
-      return (
-        parseDate(
-          item.end || item.start
-        ) >= today
-      );
-    })
-    .sort((first, second) => {
-      return (
-        parseDate(first.start) -
-        parseDate(second.start)
-      );
-    })
-    .slice(0, 6);
+  const upcoming =
+    getAllEvents()
+      .filter((item) => {
+        return (
+          parseDate(
+            item.end ||
+            item.start
+          ) >= today
+        );
+      })
 
-  elements.upcomingList.innerHTML = "";
+      .sort(
+        (first, second) => {
+          return (
+            parseDate(first.start) -
+            parseDate(second.start)
+          );
+        }
+      )
+
+      .slice(0, 6);
+
+  elements.upcomingList.innerHTML =
+    "";
 
   if (upcoming.length === 0) {
     elements.upcomingList.innerHTML = `
@@ -883,20 +1308,17 @@ function renderUpcoming() {
   }
 
   upcoming.forEach((item) => {
-    const difference =
-      daysBetween(
-        today,
-        parseDate(item.start)
+    const row =
+      document.createElement(
+        "article"
       );
 
-    const row =
-      document.createElement("article");
-
-    row.className = "upcoming-item";
+    row.className =
+      "upcoming-item";
 
     row.innerHTML = `
       <div class="upcoming-dday">
-        ${formatDday(difference)}
+        ${formatEventDday(item, today)}
       </div>
 
       <button type="button">
@@ -914,47 +1336,84 @@ function renderUpcoming() {
 
     row
       .querySelector("button")
-      .addEventListener("click", () => {
-        showDetail(item);
-      });
+      .addEventListener(
+        "click",
+        () => {
+          showDetail(item);
+        }
+      );
 
-    elements.upcomingList.appendChild(row);
+    elements.upcomingList
+      .appendChild(row);
   });
 }
 
 function openAddModal(dateKey) {
+  if (!isAdmin) {
+    showToast(
+      "일정 추가는 관리자만 할 수 있습니다."
+    );
+
+    return;
+  }
+
   elements.eventStartInput.value =
     dateKey;
 
   elements.eventEndInput.value =
     dateKey;
 
-  openModal(elements.addModal);
+  openModal(
+    elements.addModal
+  );
 
   setTimeout(() => {
-    elements.eventTitleInput.focus();
+    elements.eventTitleInput
+      .focus();
   }, 80);
 }
 
-function addCustomEvent(event) {
+async function addSharedEvent(event) {
   event.preventDefault();
 
+  if (
+    !isAdmin ||
+    !currentUser
+  ) {
+    showToast(
+      "관리자 계정으로 로그인해야 합니다."
+    );
+
+    return;
+  }
+
   const title =
-    elements.eventTitleInput.value.trim();
+    elements.eventTitleInput
+      .value
+      .trim();
 
   const start =
-    elements.eventStartInput.value;
+    elements.eventStartInput
+      .value;
 
   const end =
-    elements.eventEndInput.value;
+    elements.eventEndInput
+      .value;
 
   const category =
-    elements.eventCategoryInput.value;
+    elements.eventCategoryInput
+      .value;
 
   const description =
-    elements.eventDescriptionInput.value.trim();
+    elements.eventDescriptionInput
+      .value
+      .trim();
 
-  if (!title || !start || !end) {
+  if (
+    !title ||
+    !start ||
+    !end
+  ) {
     showToast(
       "일정 이름과 날짜를 입력해 주세요."
     );
@@ -970,36 +1429,82 @@ function addCustomEvent(event) {
     return;
   }
 
-  customEvents.push({
-    id: `custom-${Date.now()}`,
-    title,
-    start,
-    end,
-    category,
-    description,
-    source: "custom"
-  });
+  const saveButton =
+    elements.addEventForm
+      .querySelector(
+        'button[type="submit"]'
+      );
 
-  saveCustomEvents();
+  const originalText =
+    saveButton.textContent;
 
-  elements.addEventForm.reset();
+  saveButton.disabled =
+    true;
 
-  closeModal(elements.addModal);
+  saveButton.textContent =
+    "저장 중...";
 
-  shownMonth = startOfMonth(
-    parseDate(start)
-  );
+  try {
+    await addDoc(
+      collection(db, "events"),
+      {
+        title,
+        start,
+        end,
+        category,
+        description,
 
-  renderAll();
+        createdBy:
+          currentUser.email,
 
-  showToast(
-    "일정이 저장되었습니다."
-  );
+        createdAt:
+          serverTimestamp()
+      }
+    );
+
+    elements.addEventForm
+      .reset();
+
+    closeModal(
+      elements.addModal
+    );
+
+    shownMonth =
+      startOfMonth(
+        parseDate(start)
+      );
+
+    renderCalendar();
+
+    showToast(
+      "공유 일정이 저장되었습니다."
+    );
+  } catch (error) {
+    console.error(
+      "일정 저장 실패",
+      error
+    );
+
+    showToast(
+      "일정을 저장하지 못했습니다. 관리자 로그인과 Firestore 규칙을 확인하세요."
+    );
+  } finally {
+    saveButton.disabled =
+      false;
+
+    saveButton.textContent =
+      originalText;
+  }
 }
 
 function showDetail(item) {
   const isSelected =
     selectedDdayId === item.id;
+
+  const canDelete =
+    item.source ===
+      "firestore" &&
+    isAdmin;
 
   elements.detailTitle.textContent =
     item.title;
@@ -1040,14 +1545,14 @@ function showDetail(item) {
       </button>
 
       ${
-        item.source === "custom"
+        canDelete
           ? `
             <button
               id="deleteEvent"
               class="delete-button"
               type="button"
             >
-              이 일정 삭제
+              이 공유 일정 삭제
             </button>
           `
           : ""
@@ -1056,34 +1561,43 @@ function showDetail(item) {
   `;
 
   document
-    .querySelector("#setDdayButton")
-    .addEventListener("click", () => {
-      if (isSelected) {
-        selectedDdayId = "";
+    .querySelector(
+      "#setDdayButton"
+    )
+    .addEventListener(
+      "click",
+      () => {
+        if (isSelected) {
+          selectedDdayId = "";
 
-        localStorage.removeItem(
-          "chiak-selected-dday"
+          localStorage.removeItem(
+            "chiak-selected-dday"
+          );
+
+          showToast(
+            "D-DAY가 해제되었습니다."
+          );
+        } else {
+          selectedDdayId =
+            item.id;
+
+          localStorage.setItem(
+            "chiak-selected-dday",
+            selectedDdayId
+          );
+
+          showToast(
+            "D-DAY가 설정되었습니다."
+          );
+        }
+
+        closeModal(
+          elements.detailModal
         );
 
-        showToast(
-          "D-DAY가 해제되었습니다."
-        );
-      } else {
-        selectedDdayId = item.id;
-
-        localStorage.setItem(
-          "chiak-selected-dday",
-          selectedDdayId
-        );
-
-        showToast(
-          "D-DAY가 설정되었습니다."
-        );
+        renderDday();
       }
-
-      closeModal(elements.detailModal);
-      renderDday();
-    });
+    );
 
   const deleteButton =
     document.querySelector(
@@ -1094,44 +1608,99 @@ function showDetail(item) {
     deleteButton.addEventListener(
       "click",
       () => {
-        customEvents =
-          customEvents.filter(
-            (eventItem) => {
-              return eventItem.id !== item.id;
-            }
-          );
-
-        if (selectedDdayId === item.id) {
-          selectedDdayId = "";
-
-          localStorage.removeItem(
-            "chiak-selected-dday"
-          );
-        }
-
-        saveCustomEvents();
-
-        closeModal(
-          elements.detailModal
-        );
-
-        renderAll();
-
-        showToast(
-          "일정이 삭제되었습니다."
+        deleteSharedEvent(
+          item,
+          deleteButton
         );
       }
     );
   }
 
-  openModal(elements.detailModal);
+  openModal(
+    elements.detailModal
+  );
+}
+
+async function deleteSharedEvent(
+  item,
+  button
+) {
+  if (
+    !isAdmin ||
+    item.source !== "firestore"
+  ) {
+    showToast(
+      "공유 일정 삭제는 관리자만 할 수 있습니다."
+    );
+
+    return;
+  }
+
+  const originalText =
+    button.textContent;
+
+  button.disabled =
+    true;
+
+  button.textContent =
+    "삭제 중...";
+
+  try {
+    await deleteDoc(
+      doc(
+        db,
+        "events",
+        item.id
+      )
+    );
+
+    if (
+      selectedDdayId === item.id
+    ) {
+      selectedDdayId = "";
+
+      localStorage.removeItem(
+        "chiak-selected-dday"
+      );
+    }
+
+    closeModal(
+      elements.detailModal
+    );
+
+    renderDday();
+
+    showToast(
+      "공유 일정이 삭제되었습니다."
+    );
+  } catch (error) {
+    console.error(
+      "일정 삭제 실패",
+      error
+    );
+
+    showToast(
+      "일정을 삭제하지 못했습니다."
+    );
+
+    button.disabled =
+      false;
+
+    button.textContent =
+      originalText;
+  }
 }
 
 function askAssistant(question) {
-  appendMessage(question, "user");
+  appendMessage(
+    question,
+    "user"
+  );
 
   const answer =
-    createAssistantAnswer(question);
+    createAssistantAnswer(
+      question
+    );
 
   setTimeout(() => {
     appendMessage(
@@ -1141,63 +1710,85 @@ function askAssistant(question) {
   }, 160);
 }
 
-function createAssistantAnswer(question) {
-  const query = question
-    .replace(/\s+/g, " ")
-    .trim();
+function createAssistantAnswer(
+  question
+) {
+  const queryText =
+    question
+      .replace(/\s+/g, " ")
+      .trim();
 
-  const today = stripTime(new Date());
+  const today =
+    stripTime(new Date());
 
   if (
-    /(디데이|d-day|D-DAY)/i.test(
-      query
+    /(디데이|d-day)/i.test(
+      queryText
     )
   ) {
     const target =
-      getAllEvents().find((item) => {
-        return (
-          item.id === selectedDdayId
-        );
-      }) ||
+      getAllEvents().find(
+        (item) => {
+          return (
+            item.id ===
+            selectedDdayId
+          );
+        }
+      ) ||
       getAutomaticDdayEvent();
 
     if (!target) {
-      return "현재 표시할 D-DAY 일정이 없습니다.";
-    }
-
-    const difference =
-      daysBetween(
-        today,
-        parseDate(target.start)
+      return (
+        "현재 표시할 D-DAY 일정이 없습니다."
       );
+    }
 
     return (
       `${target.title}은(는) ` +
-      `${formatDday(difference)}입니다.\n` +
+      `${formatEventDday(target, today)}입니다.\n` +
       `${formatEventDate(target)}`
     );
   }
 
-  let candidates = getAllEvents();
+  let candidates =
+    getAllEvents();
 
-  let rangeStart = today;
-  let rangeEnd = addDays(today, 60);
-  let rangeLabel = "앞으로";
-  let hasSpecificRange = false;
+  let rangeStart =
+    today;
 
-  if (query.includes("오늘")) {
+  let rangeEnd =
+    addDays(today, 60);
+
+  let rangeLabel =
+    "앞으로";
+
+  let hasSpecificRange =
+    false;
+
+  if (
+    queryText.includes("오늘")
+  ) {
     rangeStart = today;
     rangeEnd = today;
     rangeLabel = "오늘";
     hasSpecificRange = true;
-  } else if (query.includes("내일")) {
-    rangeStart = addDays(today, 1);
-    rangeEnd = rangeStart;
-    rangeLabel = "내일";
-    hasSpecificRange = true;
   } else if (
-    query.includes("다음 주") ||
-    query.includes("다음주")
+    queryText.includes("내일")
+  ) {
+    rangeStart =
+      addDays(today, 1);
+
+    rangeEnd =
+      rangeStart;
+
+    rangeLabel =
+      "내일";
+
+    hasSpecificRange =
+      true;
+  } else if (
+    queryText.includes("다음 주") ||
+    queryText.includes("다음주")
   ) {
     rangeStart =
       startOfNextWeek(today);
@@ -1205,11 +1796,14 @@ function createAssistantAnswer(question) {
     rangeEnd =
       addDays(rangeStart, 6);
 
-    rangeLabel = "다음 주";
-    hasSpecificRange = true;
+    rangeLabel =
+      "다음 주";
+
+    hasSpecificRange =
+      true;
   } else if (
-    query.includes("이번 주") ||
-    query.includes("이번주")
+    queryText.includes("이번 주") ||
+    queryText.includes("이번주")
   ) {
     rangeStart =
       startOfWeekSunday(today);
@@ -1217,30 +1811,41 @@ function createAssistantAnswer(question) {
     rangeEnd =
       addDays(rangeStart, 6);
 
-    rangeLabel = "이번 주";
-    hasSpecificRange = true;
+    rangeLabel =
+      "이번 주";
+
+    hasSpecificRange =
+      true;
   } else if (
-    query.includes("이번 달") ||
-    query.includes("이번달")
+    queryText.includes("이번 달") ||
+    queryText.includes("이번달")
   ) {
     rangeStart =
       startOfMonth(today);
 
-    rangeEnd = new Date(
-      today.getFullYear(),
-      today.getMonth() + 1,
-      0
-    );
+    rangeEnd =
+      new Date(
+        today.getFullYear(),
+        today.getMonth() + 1,
+        0
+      );
 
-    rangeLabel = "이번 달";
-    hasSpecificRange = true;
+    rangeLabel =
+      "이번 달";
+
+    hasSpecificRange =
+      true;
   } else {
     const monthMatch =
-      query.match(/(\d{1,2})월/);
+      queryText.match(
+        /(\d{1,2})월/
+      );
 
     if (monthMatch) {
       const month =
-        Number(monthMatch[1]) - 1;
+        Number(
+          monthMatch[1]
+        ) - 1;
 
       let year =
         today.getFullYear();
@@ -1253,122 +1858,166 @@ function createAssistantAnswer(question) {
       }
 
       rangeStart =
-        new Date(year, month, 1);
+        new Date(
+          year,
+          month,
+          1
+        );
 
       rangeEnd =
-        new Date(year, month + 1, 0);
+        new Date(
+          year,
+          month + 1,
+          0
+        );
 
       rangeLabel =
         `${year}년 ${month + 1}월`;
 
-      hasSpecificRange = true;
+      hasSpecificRange =
+        true;
     }
   }
 
   if (
     /(시험|고사|학력평가|모의평가|평가)/.test(
-      query
+      queryText
     )
   ) {
     candidates =
-      candidates.filter((item) => {
-        return item.category === "exam";
-      });
+      candidates.filter(
+        (item) => {
+          return (
+            item.category ===
+            "exam"
+          );
+        }
+      );
   } else if (
     /(수행|과제|제출|준비물)/.test(
-      query
+      queryText
     )
   ) {
     candidates =
-      candidates.filter((item) => {
-        return (
-          item.category ===
-          "assignment"
-        );
-      });
+      candidates.filter(
+        (item) => {
+          return (
+            item.category ===
+            "assignment"
+          );
+        }
+      );
   } else if (
-    query.includes("동아리")
+    queryText.includes("동아리")
   ) {
     candidates =
-      candidates.filter((item) => {
-        return item.category === "club";
-      });
+      candidates.filter(
+        (item) => {
+          return (
+            item.category ===
+            "club"
+          );
+        }
+      );
   } else if (
     /(방학|공휴일|휴일|연휴)/.test(
-      query
+      queryText
     )
   ) {
     candidates =
-      candidates.filter((item) => {
-        return (
-          item.category ===
-          "holiday"
-        );
-      });
+      candidates.filter(
+        (item) => {
+          return (
+            item.category ===
+            "holiday"
+          );
+        }
+      );
   } else if (
-    /(회의|상담)/.test(query)
+    /(회의|상담)/.test(
+      queryText
+    )
   ) {
     candidates =
-      candidates.filter((item) => {
-        return (
-          item.category ===
-          "meeting"
-        );
-      });
+      candidates.filter(
+        (item) => {
+          return (
+            item.category ===
+            "meeting"
+          );
+        }
+      );
   }
 
   const asksNext =
     /(다음|가장 가까운|언제)/.test(
-      query
+      queryText
     );
 
   if (
     asksNext &&
     !hasSpecificRange
   ) {
-    candidates = candidates
-      .filter((item) => {
-        return (
-          parseDate(
-            item.end || item.start
-          ) >= today
-        );
-      })
-      .sort((first, second) => {
-        return (
-          parseDate(first.start) -
-          parseDate(second.start)
-        );
-      })
-      .slice(0, 1);
-
-    rangeLabel = "가장 가까운";
-  } else {
-    candidates = candidates
-      .filter((item) => {
-        const itemStart =
-          parseDate(item.start);
-
-        const itemEnd =
-          parseDate(
-            item.end || item.start
+    candidates =
+      candidates
+        .filter((item) => {
+          return (
+            parseDate(
+              item.end ||
+              item.start
+            ) >= today
           );
+        })
 
-        return (
-          itemStart <= rangeEnd &&
-          itemEnd >= rangeStart
-        );
-      })
-      .sort((first, second) => {
-        return (
-          parseDate(first.start) -
-          parseDate(second.start)
-        );
-      })
-      .slice(0, 8);
+        .sort(
+          (first, second) => {
+            return (
+              parseDate(first.start) -
+              parseDate(second.start)
+            );
+          }
+        )
+
+        .slice(0, 1);
+
+    rangeLabel =
+      "가장 가까운";
+  } else {
+    candidates =
+      candidates
+        .filter((item) => {
+          const itemStart =
+            parseDate(
+              item.start
+            );
+
+          const itemEnd =
+            parseDate(
+              item.end ||
+              item.start
+            );
+
+          return (
+            itemStart <= rangeEnd &&
+            itemEnd >= rangeStart
+          );
+        })
+
+        .sort(
+          (first, second) => {
+            return (
+              parseDate(first.start) -
+              parseDate(second.start)
+            );
+          }
+        )
+
+        .slice(0, 8);
   }
 
-  if (candidates.length === 0) {
+  if (
+    candidates.length === 0
+  ) {
     return (
       `${rangeLabel} 조건에 맞는 ` +
       `등록 일정이 없습니다.`
@@ -1377,16 +2026,10 @@ function createAssistantAnswer(question) {
 
   const lines =
     candidates.map((item) => {
-      const difference =
-        daysBetween(
-          today,
-          parseDate(item.start)
-        );
-
       return (
         `• ${formatShortDate(item)}  ` +
         `${item.title} ` +
-        `(${formatDday(difference)})`
+        `(${formatEventDday(item, today)})`
       );
     });
 
@@ -1396,9 +2039,14 @@ function createAssistantAnswer(question) {
   );
 }
 
-function appendMessage(text, role) {
+function appendMessage(
+  text,
+  role
+) {
   const message =
-    document.createElement("div");
+    document.createElement(
+      "div"
+    );
 
   message.className =
     `message ${
@@ -1407,11 +2055,11 @@ function appendMessage(text, role) {
         : "assistant-message"
     }`;
 
-  message.textContent = text;
+  message.textContent =
+    text;
 
-  elements.chatLog.appendChild(
-    message
-  );
+  elements.chatLog
+    .appendChild(message);
 
   elements.chatLog.scrollTop =
     elements.chatLog.scrollHeight;
@@ -1423,7 +2071,10 @@ function applySavedTheme() {
       "chiak-calendar-theme"
     ) || "red";
 
-  setTheme(savedTheme, false);
+  setTheme(
+    savedTheme,
+    false
+  );
 }
 
 function setTheme(
@@ -1444,12 +2095,17 @@ function setTheme(
       ? theme
       : "red";
 
-  if (selectedTheme === "red") {
+  if (
+    selectedTheme === "red"
+  ) {
     document.documentElement
-      .removeAttribute("data-theme");
+      .removeAttribute(
+        "data-theme"
+      );
   } else {
     document.documentElement
-      .dataset.theme = selectedTheme;
+      .dataset.theme =
+        selectedTheme;
   }
 
   document
@@ -1468,7 +2124,9 @@ function setTheme(
     getComputedStyle(
       document.documentElement
     )
-      .getPropertyValue("--banner")
+      .getPropertyValue(
+        "--banner"
+      )
       .trim();
 
   document
@@ -1504,7 +2162,7 @@ function loadMemo() {
   elements.memoSavedAt.textContent =
     savedTime
       ? `${savedTime} 저장`
-      : "자동 저장";
+      : "이 기기에 자동 저장";
 }
 
 function saveMemo() {
@@ -1542,7 +2200,7 @@ function updateMemoCount() {
 function getAllEvents() {
   return [
     ...academicEvents,
-    ...customEvents
+    ...sharedEvents
   ];
 }
 
@@ -1574,7 +2232,8 @@ function intersects(
 
   const itemEnd =
     parseDate(
-      item.end || item.start
+      item.end ||
+      item.start
     );
 
   return (
@@ -1587,7 +2246,8 @@ function eventLength(item) {
   return daysBetween(
     parseDate(item.start),
     parseDate(
-      item.end || item.start
+      item.end ||
+      item.start
     )
   );
 }
@@ -1598,7 +2258,8 @@ function formatEventDate(item) {
 
   const end =
     parseDate(
-      item.end || item.start
+      item.end ||
+      item.start
     );
 
   const startText =
@@ -1611,7 +2272,9 @@ function formatEventDate(item) {
       }
     ).format(start);
 
-  if (item.start === item.end) {
+  if (
+    item.start === item.end
+  ) {
     return startText;
   }
 
@@ -1625,7 +2288,9 @@ function formatEventDate(item) {
       }
     ).format(end);
 
-  return `${startText} ~ ${endText}`;
+  return (
+    `${startText} ~ ${endText}`
+  );
 }
 
 function formatShortDate(item) {
@@ -1634,7 +2299,8 @@ function formatShortDate(item) {
 
   const end =
     parseDate(
-      item.end || item.start
+      item.end ||
+      item.start
     );
 
   const startText =
@@ -1643,7 +2309,9 @@ function formatShortDate(item) {
       start.getDate()
     ).padStart(2, "0")}`;
 
-  if (item.start === item.end) {
+  if (
+    item.start === item.end
+  ) {
     return startText;
   }
 
@@ -1653,7 +2321,37 @@ function formatShortDate(item) {
       end.getDate()
     ).padStart(2, "0")}`;
 
-  return `${startText}~${endText}`;
+  return (
+    `${startText}~${endText}`
+  );
+}
+
+function formatEventDday(
+  item,
+  today = stripTime(new Date())
+) {
+  const start =
+    parseDate(item.start);
+
+  const end =
+    parseDate(
+      item.end ||
+      item.start
+    );
+
+  if (
+    start < today &&
+    end >= today
+  ) {
+    return "진행 중";
+  }
+
+  return formatDday(
+    daysBetween(
+      today,
+      start
+    )
+  );
 }
 
 function formatDday(difference) {
@@ -1665,7 +2363,9 @@ function formatDday(difference) {
     return `D-${difference}`;
   }
 
-  return `D+${Math.abs(difference)}`;
+  return (
+    `D+${Math.abs(difference)}`
+  );
 }
 
 function openModal(modal) {
@@ -1708,51 +2408,37 @@ function showToast(message) {
     "show"
   );
 
-  toastTimer = setTimeout(() => {
-    elements.toast.classList.remove(
-      "show"
-    );
-  }, 2400);
-}
-
-function loadCustomEvents() {
-  try {
-    const saved = JSON.parse(
-      localStorage.getItem(
-        "chiak-calendar-events"
-      ) || "[]"
-    );
-
-    return Array.isArray(saved)
-      ? saved
-      : [];
-  } catch (error) {
-    console.error(
-      "저장된 일정을 불러오지 못했습니다.",
-      error
-    );
-
-    return [];
-  }
-}
-
-function saveCustomEvents() {
-  localStorage.setItem(
-    "chiak-calendar-events",
-    JSON.stringify(customEvents)
+  toastTimer = setTimeout(
+    () => {
+      elements.toast.classList.remove(
+        "show"
+      );
+    },
+    2800
   );
 }
 
 function parseDate(dateString) {
-  const [year, month, day] =
-    dateString
-      .split("-")
-      .map(Number);
+  const [
+    year,
+    month,
+    day
+  ] = dateString
+    .split("-")
+    .map(Number);
 
   return new Date(
     year,
     month - 1,
     day
+  );
+}
+
+function isDateKey(value) {
+  return (
+    /^\d{4}-\d{2}-\d{2}$/.test(
+      value
+    )
   );
 }
 
@@ -1770,7 +2456,9 @@ function formatDateKey(date) {
       date.getDate()
     ).padStart(2, "0");
 
-  return `${year}-${month}-${day}`;
+  return (
+    `${year}-${month}-${day}`
+  );
 }
 
 function stripTime(date) {
@@ -1790,10 +2478,12 @@ function startOfMonth(date) {
 }
 
 function startOfWeekSunday(date) {
-  const result = stripTime(date);
+  const result =
+    stripTime(date);
 
   result.setDate(
-    result.getDate() - result.getDay()
+    result.getDate() -
+    result.getDay()
   );
 
   return result;
@@ -1806,7 +2496,10 @@ function startOfNextWeek(date) {
   );
 }
 
-function addDays(date, amount) {
+function addDays(
+  date,
+  amount
+) {
   const result =
     new Date(date);
 
@@ -1828,15 +2521,31 @@ function daysBetween(
     stripTime(secondDate);
 
   return Math.round(
-    (second - first) / 86400000
+    (second - first) /
+    86400000
   );
 }
 
 function escapeHtml(value) {
   return String(value)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
+    .replaceAll(
+      "&",
+      "&amp;"
+    )
+    .replaceAll(
+      "<",
+      "&lt;"
+    )
+    .replaceAll(
+      ">",
+      "&gt;"
+    )
+    .replaceAll(
+      '"',
+      "&quot;"
+    )
+    .replaceAll(
+      "'",
+      "&#039;"
+    );
 }
