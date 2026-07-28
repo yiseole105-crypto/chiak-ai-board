@@ -1,0 +1,467 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#a92c30" />
+  <title>치악고 AI 스마트 게시판</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <main class="app-shell">
+    <header class="hero-banner">
+      <div class="hero-copy">
+        <p class="school-name">2026 치악고등학교 학사일정</p>
+
+        <div class="month-title">
+          <strong id="heroMonth">07</strong>
+
+          <div>
+            <span id="heroYear">2026</span>
+            <small>MONTH</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-actions">
+        <div class="theme-tabs" aria-label="배너 색상 선택">
+          <button
+            type="button"
+            class="theme-tab red"
+            data-theme="red"
+            aria-label="레드"
+          ></button>
+
+          <button
+            type="button"
+            class="theme-tab navy"
+            data-theme="navy"
+            aria-label="네이비"
+          ></button>
+
+          <button
+            type="button"
+            class="theme-tab forest"
+            data-theme="forest"
+            aria-label="포레스트"
+          ></button>
+
+          <button
+            type="button"
+            class="theme-tab purple"
+            data-theme="purple"
+            aria-label="퍼플"
+          ></button>
+
+          <button
+            type="button"
+            class="theme-tab coral"
+            data-theme="coral"
+            aria-label="코랄"
+          ></button>
+
+          <button
+            type="button"
+            class="theme-tab charcoal"
+            data-theme="charcoal"
+            aria-label="차콜"
+          ></button>
+        </div>
+
+        <button
+          id="openAddEvent"
+          class="primary-button"
+          type="button"
+        >
+          일정 추가
+        </button>
+      </div>
+    </header>
+
+    <section class="workspace">
+      <section class="calendar-panel">
+        <div class="calendar-toolbar">
+          <div class="calendar-title-block">
+            <p>MONTHLY CALENDAR</p>
+
+            <h1>
+              <span id="calendarYear">2026</span>.<span id="calendarMonth">07</span>
+            </h1>
+          </div>
+
+          <div class="calendar-buttons">
+            <button
+              id="prevMonth"
+              class="nav-button"
+              type="button"
+              aria-label="이전 달"
+            >
+              ←
+            </button>
+
+            <button
+              id="goToday"
+              class="today-button"
+              type="button"
+            >
+              오늘
+            </button>
+
+            <button
+              id="nextMonth"
+              class="nav-button"
+              type="button"
+              aria-label="다음 달"
+            >
+              →
+            </button>
+          </div>
+        </div>
+
+        <div class="weekday-row" aria-hidden="true">
+          <span class="sunday">일</span>
+          <span>월</span>
+          <span>화</span>
+          <span>수</span>
+          <span>목</span>
+          <span>금</span>
+          <span class="saturday">토</span>
+        </div>
+
+        <div
+          id="calendarWeeks"
+          class="calendar-weeks"
+        ></div>
+
+        <div class="calendar-footer">
+          <div class="legend">
+            <span>
+              <i data-category="exam"></i>
+              시험·평가
+            </span>
+
+            <span>
+              <i data-category="school"></i>
+              학교 행사
+            </span>
+
+            <span>
+              <i data-category="club"></i>
+              동아리
+            </span>
+
+            <span>
+              <i data-category="meeting"></i>
+              회의·상담
+            </span>
+
+            <span>
+              <i data-category="holiday"></i>
+              방학·공휴일
+            </span>
+
+            <span>
+              <i data-category="assignment"></i>
+              수행·과제
+            </span>
+          </div>
+
+          <p>
+            날짜를 누르면 해당 날짜로 일정을 추가할 수 있습니다.
+          </p>
+        </div>
+      </section>
+
+      <aside class="side-column">
+        <section class="side-card dday-card">
+          <div class="side-card-heading">
+            <div>
+              <p>D-DAY</p>
+              <h2>중요 일정</h2>
+            </div>
+
+            <button
+              id="clearDday"
+              class="text-button"
+              type="button"
+            >
+              해제
+            </button>
+          </div>
+
+          <div
+            id="selectedDday"
+            class="selected-dday"
+          ></div>
+
+          <div class="upcoming-heading">
+            <strong>다가오는 일정</strong>
+            <span>날짜순</span>
+          </div>
+
+          <div
+            id="upcomingList"
+            class="upcoming-list"
+          ></div>
+        </section>
+
+        <section class="side-card assistant-card">
+          <div class="side-card-heading">
+            <div>
+              <p>AI ASSISTANT</p>
+              <h2>일정 도우미</h2>
+            </div>
+          </div>
+
+          <div
+            id="chatLog"
+            class="chat-log"
+            aria-live="polite"
+          >
+            <div class="message assistant-message">
+              등록된 학사일정과 반 일정을 바탕으로 답합니다.<br />
+              예: “이번 주 일정”, “다음 시험”, “9월 동아리”
+            </div>
+          </div>
+
+          <div class="quick-questions">
+            <button
+              type="button"
+              data-question="이번 주 일정 알려줘"
+            >
+              이번 주
+            </button>
+
+            <button
+              type="button"
+              data-question="다음 시험은 언제야?"
+            >
+              다음 시험
+            </button>
+
+            <button
+              type="button"
+              data-question="이번 달 수행평가 알려줘"
+            >
+              수행평가
+            </button>
+          </div>
+
+          <form
+            id="assistantForm"
+            class="assistant-form"
+          >
+            <input
+              id="assistantInput"
+              type="text"
+              autocomplete="off"
+              placeholder="일정을 질문하세요"
+            />
+
+            <button type="submit">
+              전송
+            </button>
+          </form>
+        </section>
+
+        <section class="side-card memo-card">
+          <div class="side-card-heading">
+            <div>
+              <p>MEMO</p>
+              <h2>우리 반 메모장</h2>
+            </div>
+
+            <button
+              id="clearMemo"
+              class="text-button"
+              type="button"
+            >
+              지우기
+            </button>
+          </div>
+
+          <textarea
+            id="memoInput"
+            maxlength="2000"
+            placeholder="준비물, 수행평가 범위, 반 공지 등을 메모하세요."
+          ></textarea>
+
+          <div class="memo-status">
+            <span id="memoSavedAt">자동 저장</span>
+            <span id="memoCount">0 / 2000</span>
+          </div>
+        </section>
+      </aside>
+    </section>
+  </main>
+
+  <div
+    id="addModal"
+    class="modal"
+    aria-hidden="true"
+  >
+    <div
+      class="modal-backdrop"
+      data-close-add
+    ></div>
+
+    <section
+      class="modal-card"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="addModalTitle"
+    >
+      <button
+        class="modal-close"
+        type="button"
+        data-close-add
+        aria-label="닫기"
+      >
+        ×
+      </button>
+
+      <p class="modal-kicker">
+        NEW SCHEDULE
+      </p>
+
+      <h2 id="addModalTitle">
+        일정 추가
+      </h2>
+
+      <form
+        id="addEventForm"
+        class="event-form"
+      >
+        <label>
+          일정 이름
+
+          <input
+            id="eventTitleInput"
+            type="text"
+            maxlength="40"
+            required
+            placeholder="예: 물리 수행평가 제출"
+          />
+        </label>
+
+        <div class="date-row">
+          <label>
+            시작 날짜
+
+            <input
+              id="eventStartInput"
+              type="date"
+              required
+            />
+          </label>
+
+          <label>
+            종료 날짜
+
+            <input
+              id="eventEndInput"
+              type="date"
+              required
+            />
+          </label>
+        </div>
+
+        <label>
+          일정 종류
+
+          <select id="eventCategoryInput">
+            <option value="assignment">
+              수행·과제
+            </option>
+
+            <option value="exam">
+              시험·평가
+            </option>
+
+            <option value="school">
+              학교 행사
+            </option>
+
+            <option value="club">
+              동아리
+            </option>
+
+            <option value="meeting">
+              회의·상담
+            </option>
+
+            <option value="holiday">
+              방학·공휴일
+            </option>
+          </select>
+        </label>
+
+        <label>
+          세부 내용
+
+          <textarea
+            id="eventDescriptionInput"
+            rows="4"
+            maxlength="200"
+            placeholder="시험 범위, 준비물, 제출 방법 등을 적어 주세요."
+          ></textarea>
+        </label>
+
+        <button
+          class="primary-button full-button"
+          type="submit"
+        >
+          저장
+        </button>
+      </form>
+    </section>
+  </div>
+
+  <div
+    id="detailModal"
+    class="modal"
+    aria-hidden="true"
+  >
+    <div
+      class="modal-backdrop"
+      data-close-detail
+    ></div>
+
+    <section
+      class="modal-card detail-card"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="detailTitle"
+    >
+      <button
+        class="modal-close"
+        type="button"
+        data-close-detail
+        aria-label="닫기"
+      >
+        ×
+      </button>
+
+      <p class="modal-kicker">
+        SCHEDULE DETAIL
+      </p>
+
+      <h2 id="detailTitle">
+        일정 상세
+      </h2>
+
+      <div id="detailBody"></div>
+    </section>
+  </div>
+
+  <div
+    id="toast"
+    class="toast"
+    aria-live="polite"
+  ></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
